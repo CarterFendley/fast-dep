@@ -1,0 +1,89 @@
+🐍 Found CPython 3.7m at /Users/carter/opt/anaconda3/envs/fast-dep/bin/python3
+📡 Using build options features from pyproject.toml
+🎯 Found 1 Cargo targets in `Cargo.toml`: fast-dep
+💻 Using `MACOSX_DEPLOYMENT_TARGET=10.7` for x86_64-apple-darwin by default
+warning: unused manifest key: tool
+warning: fields `name` and `origin` are never read
+  --> src/lib.rs:10:5
+   |
+9  | struct ModuleSpec {
+   |        ---------- fields in this struct
+10 |     name: String,
+   |     ^^^^
+11 |     origin: String
+   |     ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `fast-dep` (lib) generated 1 warning
+   Compiling fast-dep v0.0.1 (/Users/carter/src/fast-pydep)
+warning: unused `Result` that must be used
+ --> src/bin/bin.rs:8:5
+  |
+8 |     get_ast(&args[1]);
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: this `Result` may be an `Err` variant, which should be handled
+  = note: `#[warn(unused_must_use)]` on by default
+
+error: linking with `cc` failed: exit status: 1
+  |
+  = note: LC_ALL="C" PATH="/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/bin:/Users/carter/opt/anaconda3/envs/fast-dep/bin:/Users/carter/opt/anaconda3/condabin:/Users/carter/.nvm/versions/node/v18.4.0/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Apple/usr/bin:/Users/carter/.cargo/bin:/Users/carter/.local/bin:/Users/carter/.local/bin:/usr/local/bin:/Users/carter/src/ccp/scripts:/Users/carter/src/moos-ivp/bin:/Users/carter/src/moos-ivp/scripts:/Users/carter/src/moos-ivp-aquaticus/bin:/Users/carter/src/moos-ivp-agent/bin:/Users/carter/src/mintest/build/bin:/usr/local/opt/python@3.7/bin:/Users/carter/Library/Android/sdk/tools:/Users/carter/Library/Android/sdk/platform-tools:/Users/carter/.local/bin" VSLANG="1033" ZERO_AR_DATE="1" "cc" "-arch" "x86_64" "-m64" "/var/folders/92/75mxck_s5yb7r22lq6rz7dvr0000gn/T/rustcpnfueA/symbols.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.1308p8rpprbg6scg.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.1conwkgttnd1k27r.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.1s08ocoe2iab4a7s.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.1xgx2ye46a8lr5cg.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.1zlmvdx7nvkdl0lx.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.25bgb5mvtv62udnn.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.2bdm3t5hrf4aogwv.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.2ekrrrtwicy67qff.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.2kxc9fs4pfm0xqq6.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.33x5tafr61mktfea.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.35g3hgp6ezg3qfsv.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.4a0cxh6ijgepf2on.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.4cn03x0lf8zzy0u4.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.4qys0jpzt9l1898y.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.4w509mc5gpvvitgi.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.4wl6pf4i9qwf4sg8.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.8fa0f7tir8kfgh2.rcgu.o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827.35mx2l0hwxaijmi0.rcgu.o" "-L" "/Users/carter/src/fast-pydep/target/debug/deps" "-L" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib" "/Users/carter/src/fast-pydep/target/debug/deps/libfast_dep.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libpyo3-da57dca2c8a6e26e.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libmemoffset-32dad51b6a921f11.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libparking_lot-c8f7a768811553ea.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libparking_lot_core-45c9697e460f2cd2.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libcfg_if-acfc2211b70b5f57.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libsmallvec-e252f989f07c0f5b.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/liblock_api-152fd07be8d5be0b.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libscopeguard-a517448771cb7a98.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libpyo3_ffi-b34ae05e00c4569b.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/liblibc-788eb53331acbb68.rlib" "/Users/carter/src/fast-pydep/target/debug/deps/libunindent-7d709e470077f8d1.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libstd-c7e7cf2a81170352.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libpanic_unwind-e0619d6feac69cf6.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libobject-be1495bc50bf5368.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libmemchr-a7e66533f0bed8a9.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libaddr2line-b6601d24c7a9ac17.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libgimli-69f5ae8057968871.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/librustc_demangle-15b2b38b5f48202b.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libstd_detect-01f573fbd9998252.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libhashbrown-9f41ec691828f309.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libminiz_oxide-1e081b6ed75fbcf1.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libadler-1b50b2f0247a747e.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/librustc_std_workspace_alloc-4fb26f480c7dd6ad.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libunwind-b3838a63e58d1b8d.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libcfg_if-21ecf9e19621985e.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/liblibc-1685c0c9f6890090.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/liballoc-ed75e840b78e42f1.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/librustc_std_workspace_core-5ae3f676cc38c1b9.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libcore-169199e4a9035370.rlib" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib/libcompiler_builtins-6ab09b78d5863c75.rlib" "-liconv" "-lSystem" "-lc" "-lm" "-L" "/Users/carter/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/x86_64-apple-darwin/lib" "-o" "/Users/carter/src/fast-pydep/target/debug/deps/fast_dep-5c87bb2069ff0827" "-Wl,-dead_strip" "-nodefaultlibs"
+  = note: Undefined symbols for architecture x86_64:
+            "_PyBytes_AsString", referenced from:
+                pyo3::types::bytes::PyBytes::as_bytes::h99656d008d7efdfe in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.2.rcgu.o)
+            "_PyBytes_Size", referenced from:
+                pyo3::types::bytes::PyBytes::as_bytes::h99656d008d7efdfe in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.2.rcgu.o)
+            "_PyErr_Fetch", referenced from:
+                pyo3::err::PyErr::take::h143007026176c974 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.8.rcgu.o)
+            "_PyErr_NewExceptionWithDoc", referenced from:
+                pyo3::err::PyErr::new_type::hd797a07c49d74a64 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.8.rcgu.o)
+            "_PyErr_NormalizeException", referenced from:
+                pyo3::err::PyErr::make_normalized::h19a9ae696ff14b75 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.8.rcgu.o)
+            "_PyErr_Print", referenced from:
+                pyo3::err::panic_after_error::h1f4f96685ac564a4 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.8.rcgu.o)
+            "_PyErr_PrintEx", referenced from:
+                pyo3::err::PyErr::take::h143007026176c974 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.8.rcgu.o)
+            "_PyErr_Restore", referenced from:
+                pyo3::err::PyErr::take::h143007026176c974 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.8.rcgu.o)
+            "_PyEval_SaveThread", referenced from:
+                pyo3::gil::prepare_freethreaded_python::_$u7b$$u7b$closure$u7d$$u7d$::h0a3e2ac9fe9df9e1 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.13.rcgu.o)
+            "_PyExc_BaseException", referenced from:
+                _$LT$pyo3..exceptions..PyBaseException$u20$as$u20$pyo3..type_object..PyTypeInfo$GT$::type_object_raw::h4fa2a23e1c47ba03 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.0.rcgu.o)
+            "_PyExc_TypeError", referenced from:
+                _$LT$pyo3..exceptions..PyTypeError$u20$as$u20$pyo3..type_object..PyTypeInfo$GT$::type_object_raw::h831f3e310a18daec in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.0.rcgu.o)
+            "_PyGILState_Ensure", referenced from:
+                pyo3::gil::GILGuard::acquire_unchecked::h3c52a0b4a9d38193 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.13.rcgu.o)
+            "_PyGILState_Release", referenced from:
+                _$LT$pyo3..gil..GILGuard$u20$as$u20$core..ops..drop..Drop$GT$::drop::h591bb87184f5b6e4 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.13.rcgu.o)
+            "_PyImport_Import", referenced from:
+                pyo3::types::module::PyModule::import::h0ca1c31ddc4e0f5f in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.9.rcgu.o)
+            "_PyObject_GetAttr", referenced from:
+                pyo3::types::any::PyAny::_getattr::h9b1b57136f81f1e6 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.2.rcgu.o)
+            "_PyObject_Repr", referenced from:
+                pyo3::types::any::PyAny::repr::hfc9930093fd8f1f3 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.2.rcgu.o)
+            "_PyUnicode_AsEncodedString", referenced from:
+                pyo3::types::string::PyString::to_string_lossy::hfffc13d7804c6024 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.9.rcgu.o)
+            "_PyUnicode_AsUTF8AndSize", referenced from:
+                pyo3::types::string::PyString::to_str::hdce395660d794dc9 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.9.rcgu.o)
+            "_PyUnicode_FromStringAndSize", referenced from:
+                pyo3::types::string::PyString::new::hf5b16eb32cce5548 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.9.rcgu.o)
+                pyo3::types::string::PyString::intern::h1ed0600ca11fc9e7 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.9.rcgu.o)
+            "_PyUnicode_InternInPlace", referenced from:
+                pyo3::types::string::PyString::intern::h1ed0600ca11fc9e7 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.9.rcgu.o)
+            "_Py_InitializeEx", referenced from:
+                pyo3::gil::prepare_freethreaded_python::_$u7b$$u7b$closure$u7d$$u7d$::h0a3e2ac9fe9df9e1 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.13.rcgu.o)
+            "_Py_IsInitialized", referenced from:
+                pyo3::gil::prepare_freethreaded_python::_$u7b$$u7b$closure$u7d$$u7d$::h0a3e2ac9fe9df9e1 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.13.rcgu.o)
+                pyo3::gil::GILGuard::acquire::_$u7b$$u7b$closure$u7d$$u7d$::h87129d9796f6fa81 in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.13.rcgu.o)
+            "__Py_Dealloc", referenced from:
+                pyo3_ffi::object::Py_DECREF::h6fa1ce446ebae33d in libpyo3-da57dca2c8a6e26e.rlib(pyo3-da57dca2c8a6e26e.pyo3.dfa5611a-cgu.15.rcgu.o)
+          ld: symbol(s) not found for architecture x86_64
+          clang: error: linker command failed with exit code 1 (use -v to see invocation)
+          
+
+warning: `fast-dep` (bin "fast-dep") generated 1 warning
+error: could not compile `fast-dep` due to previous error; 1 warning emitted
+💥 maturin failed
+  Caused by: Failed to build a native library through cargo
+  Caused by: Cargo build finished with "exit status: 101": `MACOSX_DEPLOYMENT_TARGET="10.7" PYO3_ENVIRONMENT_SIGNATURE="cpython-3.7-64bit" PYO3_PYTHON="/Users/carter/opt/anaconda3/envs/fast-dep/bin/python3" PYTHON_SYS_EXECUTABLE="/Users/carter/opt/anaconda3/envs/fast-dep/bin/python3" "cargo" "rustc" "--features" "pyo3/extension-module" "--no-default-features" "--message-format" "json-render-diagnostics" "--manifest-path" "/Users/carter/src/fast-pydep/Cargo.toml" "--bin" "fast-dep"`
