@@ -5,24 +5,19 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::error::Error;
 
-mod types;
-use types::*;
-
 // TODO: Do tests actually need this?
 pub mod minimal_parser;
 pub use minimal_parser::*;
 
-pub fn find_spec(name: &str) -> PyResult<types::ModuleSpec> {
-    Python::with_gil(|py| {
-        let importlib_util = PyModule::import(py, "importlib.util")?;
+mod core;
+mod importlib;
 
-        let spec: types::ModuleSpec = importlib_util
-            .getattr("find_spec")?
-            .call1((name, ))?
-            .extract()?;
-
-        Ok(spec)
-    })
+#[pymodule]
+fn fast_dep(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_class::<core::DepNode>()?;
+    m.add_class::<core::DepGraph>()?;
+    m.add_class::<core::GraphBuilder>()?;
+    Ok(())
 }
 
 pub fn get_ast(file_path: &str) -> Result<(), Box<dyn Error>>{
