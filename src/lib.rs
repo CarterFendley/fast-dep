@@ -5,17 +5,18 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::error::Error;
 
-#[derive(FromPyObject)]
-pub struct ModuleSpec {
-    name: String,
-    origin: String
-}
+mod types;
+use types::*;
 
-pub fn find_spec(name: &str) -> PyResult<ModuleSpec> {
+// TODO: Do tests actually need this?
+pub mod minimal_parser;
+pub use minimal_parser::*;
+
+pub fn find_spec(name: &str) -> PyResult<types::ModuleSpec> {
     Python::with_gil(|py| {
         let importlib_util = PyModule::import(py, "importlib.util")?;
 
-        let spec: ModuleSpec = importlib_util
+        let spec: types::ModuleSpec = importlib_util
             .getattr("find_spec")?
             .call1((name, ))?
             .extract()?;
@@ -26,23 +27,42 @@ pub fn find_spec(name: &str) -> PyResult<ModuleSpec> {
 
 pub fn get_ast(file_path: &str) -> Result<(), Box<dyn Error>>{
     let mut file = File::open(Path::new(file_path))?;
+
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
-    Python::with_gil(|py| -> PyResult<()> {
-        let importlib_util = PyModule::import(py, "importlib.util")?;
+    let imports = parse(&contents);
+    dump_imports(&imports);
 
-        let spec: ModuleSpec = importlib_util
-            .getattr("find_spec")?
-            .call1(("os.path",))?
-            .extract()?;
+    // if let Some(caps) = re.captures(&contents) {
+    //     for cap in caps.iter() {
+    //         println!("Name: {}", &cap["name"])
+    //     }
+    // }
 
-        print!("{}", spec.origin);
+    // Python::with_gil(|py| -> PyResult<()>  {
+    //     let module_ast = PyModule::import(py, "ast")?;
 
-        Ok(())
-    })?;
+    //     let file: PrintIt = module_ast
+    //         .getattr("parse")?
+    //         .call1((&contents, ))?
+    //         .extract()?;
+    //     Ok(())
+    // })?;
 
-    print!("{}", contents);
+    // Python::with_gil(|py| -> PyResult<()> {
+    //     let importlib_util = PyModule::import(py, "importlib.util")?;
+
+    //     let spec: ModuleSpec = importlib_util
+    //         .getattr("find_spec")?
+    //         .call1(("os.path",))?
+    //         .extract()?;
+
+    //     print!("{}", spec.origin);
+
+    //     Ok(())
+    // })?;
+
     Ok(())
 }
 

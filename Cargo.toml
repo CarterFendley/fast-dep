@@ -7,6 +7,8 @@ edition = "2021"
 
 [dependencies]
 pyo3 = ">=0.13.0"
+# fast-dep-meta = { path = "fast-dep-meta", version = "0.0.1" }
+regex = "1.9.1"
 
 [lib]
 name = "fast_dep"
