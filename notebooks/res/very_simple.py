@@ -1,1 +1,1 @@
-import os
+from os.path import (path, other)

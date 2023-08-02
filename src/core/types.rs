@@ -1,5 +1,6 @@
 use std::collections::{HashSet, HashMap};
 use std::cell::RefCell;
+use std::ops::Deref;
 
 use pyo3::prelude::*;
 
@@ -8,7 +9,7 @@ use crate::importlib;
 #[pyclass]
 pub struct DepNode {
     pub name: String,
-    spec: importlib::ModuleSpec,
+    pub spec: importlib::ModuleSpec,
     dependencies: i32,
     // The dependencies by spec.name
     dependents: HashSet<String>
@@ -31,7 +32,7 @@ impl DepNode {
 
 #[pyclass]
 pub struct DepGraph {
-    nodes: HashMap<String, RefCell<DepNode>>,
+    pub nodes: HashMap<String, RefCell<DepNode>>,
     root_nodes: HashSet<String>
 
 }
@@ -44,16 +45,16 @@ impl DepGraph {
         }
     }
 
-    pub fn add_dependent(&self, from: &str, on: &str) {
+    pub fn add_dependent(&self, node: &str, dependent: &str) {
         // Before performing an operation on either, make sure both exist
-        assert!(self.nodes.contains_key(from));
-        assert!(self.nodes.contains_key(on));
+        assert!(self.nodes.contains_key(node));
+        assert!(self.nodes.contains_key(dependent));
 
-        let mut on_node = self.nodes.get(on).unwrap().borrow_mut();
-        on_node.dependents.insert(from.to_string());
+        let mut node = self.nodes.get(node).unwrap().borrow_mut();
+        node.dependents.insert(dependent.to_string());
 
-        let mut from_node = self.nodes.get(on).unwrap().borrow_mut();
-        from_node.dependencies += 1;
+        let mut dependent = self.nodes.get(dependent).unwrap().borrow_mut();
+        dependent.dependencies += 1;
     }
 
     pub fn add(&mut self, node: DepNode) {
@@ -65,7 +66,14 @@ impl DepGraph {
             name.clone(),
             RefCell::new(node)
         );
-        self.root_nodes.insert(name);
+        self.root_nodes.insert(name.clone());
+    }
+
+    // TODO: Read up on the `where` syntax
+    pub fn with<F>(self, name: &str, f: F) where F: Fn(&DepNode) {
+        let node = self.nodes.get(name).unwrap().borrow();
+        // TODO: Not sure I understand the deref part
+        f(node.deref())
     }
 
     pub fn has_node(&self, name: &str) -> bool {

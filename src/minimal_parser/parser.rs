@@ -1,7 +1,10 @@
+use pyo3::prelude::*;
+
 use regex::Regex;
 
 use super::types::*;
 
+#[pyfunction]
 pub fn parse(source: &str) -> Vec<ImportStmt> {
     let mut stmts: Vec<ImportStmt> = Vec::new();
 
@@ -33,8 +36,9 @@ pub fn parse(source: &str) -> Vec<ImportStmt> {
 
 
     let re_from = Regex::new(r"(?m)^[\s]*from\s+(?<from>[\S&&[^#]]+)\s+import\s+(?<import>[\S&&[^#]]+)([\s&&[^\n]][^\n]*)?$").unwrap();
-    // Note: [^#\.] vs [^#] this is done only to force separate the dots out
-    let re_dots_module = Regex::new(r"^(?<dots>\.*)(?<module>[\S&&[^#\.]]*)$").unwrap();
+    // Note: [\S&&[^#\.][\S&&[^#]*
+    // - One visible char which is not # or . then any number of chars which is visible and not # (need to be able to parse `os.path` like stuff where there is a dot in the middle of the module name)
+    let re_dots_module = Regex::new(r"^(?<dots>\.*)(?<module>[\S&&[^#\.]][\S&&[^#]]*)$").unwrap();
     for cap in re_from.captures_iter(&source) {
         if let Some(dots_module) = re_dots_module.captures(&cap["from"]) {
             let alias = Alias {
