@@ -1,0 +1,73 @@
+/*
+The following file uses the a PEST grammer (https://pest.rs/).
+
+NOTE: There a quite a few rules employing atomics. This is because the WHITESPACE rule for pest makes things more easer and more complicated at the same time.
+
+For example after defining WHITESPACE rules the `~` sequence seperator will now add WHITESPACE*. Not very expected if you ask me but we can cancel this out when this will cause trouble. 
+- https://pest.rs/book/grammars/syntax.html#atomic
+- https://pest.rs/book/grammars/syntax.html#implicit-whitespace
+*/
+
+// EOI is needed to make sure we parse the whole file. If we did not have EOI, the parsing may stop at the first invalid character and return before we hit the end of the file.
+python = { SOI ~ (expr | NEWLINE)* ~ EOI }
+
+
+// Enable whitespace: https://pest.rs/book/grammars/syntax.html#implicit-whitespace
+WHITESPACE = _{  " " | "\\" ~ NEWLINE }
+
+// Need comments to be tried first so imports wrapped in comments won't be applied
+expr = { comment | import | import_from | any_line }
+
+// The `+` is important, if we were to match `*` the expression would always match.
+// The atomics make the line show up better (not seprated by WHITESPACE included in ~)
+any_line = @{ (!NEWLINE ~ ANY)+ }
+
+comment = { string_lit | comment_single }
+// (!NEWLINE ~ ANY)*  --- Consume any chars which are not newlines
+// Predicates do not not consume chars: https://pest.rs/book/grammars/syntax.html#predicates
+comment_single = { "#" ~ (!NEWLINE ~ ANY)* }
+
+string_lit = { 
+	multiline_double_qouted |
+    multiline_single_qouted |
+    lit_double_qouted | 
+    lit_single_qouted
+}
+
+// Splitting out single and double into seperate rules becuase we can only terminate the string with the same char which started it.
+multiline_double_qouted = {"\"\"\"" ~ (!"\"\"\"" ~ ANY)* ~ "\"\"\"" }
+multiline_single_qouted = {"'''" ~ (!"'''" ~ ANY)* ~ "'''" }
+lit_double_qouted = {"\"" ~ (!("\"" | NEWLINE) ~ ANY)* ~ "\""}
+lit_single_qouted = {"'" ~ (!("'" | NEWLINE) ~ ANY)* ~ "'"}
+
+import = { "import " ~ alias_list}
+// The need for atomics in this one is to prevent the greedy consumption of spaces before " import" and inability to validate if that consumption occurred
+import_from = @{
+	"from" ~ WHITESPACE+ ~
+    module_spec ~ WHITESPACE+ ~
+    "import" ~ WHITESPACE+ ~
+    from_alias_list
+}
+
+// Must have either dots (possibly with qualified_name or qualified name
+module_spec = ${ dots+ ~ qualified_name? | qualified_name }
+// Split out for ease of counting dots in code
+dots = { "."+ }
+
+from_alias_list = !{"(" ~ strip* ~ alias ~ additional* ~ strip* ~ ")" | alias_list}
+additional = { "," ~ strip* ~ alias | "," ~ strip* }
+
+strip = _{ comment_single | WHITESPACE | NEWLINE } 
+
+// Negate the atomics from above to 
+alias_list = !{ alias ~ ("," ~ alias)* }
+alias = ${ qualified_name ~ (" "+ ~ "as" ~ " "+ ~ name)? }
+
+// Dot seperated list of names
+qualified_name = ${ name ~ ("." ~ name)* }
+
+// The following must be atomic via the `@` prefix to prevent ~ from being aliased to `" "*` and being applied during repetition
+// At least one alpha followed by any number alpha numeric
+name = ${ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+whitespace_newline = { PATTERN_WHITE_SPACE | NEWLINE }

@@ -1,1 +1,2 @@
-from os.path import (path, other)
+import os.path
+from pathlib import Path

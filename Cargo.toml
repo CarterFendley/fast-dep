@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+pest = "2.7.2"
+pest_derive = "2.7.2"
 pyo3 = ">=0.13.0"
 # fast-dep-meta = { path = "fast-dep-meta", version = "0.0.1" }
 regex = "1.9.1"
