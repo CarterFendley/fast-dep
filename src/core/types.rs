@@ -1,5 +1,5 @@
 use std::collections::{HashSet, HashMap};
-use std::cell::RefCell;
+use std::cell::{RefCell, Ref};
 use std::ops::Deref;
 
 use pyo3::prelude::*;
@@ -45,19 +45,49 @@ impl DepGraph {
         }
     }
 
-    pub fn add_dependent(&self, node: &str, dependent: &str) {
-        // Before performing an operation on either, make sure both exist
-        assert!(self.nodes.contains_key(node));
-        assert!(self.nodes.contains_key(dependent));
+    pub fn add_dependency(&self, from: &str, on: &str) {
+        /// This method will take a node which is currently under construction and updated it's dependencies.
+        /// 
+        /// **NOTE:** It is imperative that the `from` which is taken in and returned from this method is added to the graph at some point.
+        println!("Add dependency '{}' -> '{}'", from, on);
 
-        let mut node = self.nodes.get(node).unwrap().borrow_mut();
-        node.dependents.insert(dependent.to_string());
+        // Make sure we have the `on` node
+        assert!(
+            self.nodes.contains_key(from),
+            "Node does not exist on graph: {}", from
+        );
+        assert!(
+            self.nodes.contains_key(on),
+            "Node does not exist on graph: {}", on
+        );
 
-        let mut dependent = self.nodes.get(dependent).unwrap().borrow_mut();
-        dependent.dependencies += 1;
+        let mut on = self.nodes.get(on).unwrap().borrow_mut();
+        on.dependents.insert(from.to_string());
+
+        let mut from = self.nodes.get(from).unwrap().borrow_mut();
+        from.dependencies += 1;
     }
 
-    pub fn add(&mut self, node: DepNode) {
+    // pub fn add_dependent(&self, node: &str, dependent: &str) {
+    //     // Before performing an operation on either, make sure both exist
+    //     println!("Adding '{}' as dependent of '{}'.", dependent, node);
+    //     assert!(
+    //         self.nodes.contains_key(node),
+    //         "Node does not exist on graph: {}", node
+    //     );
+    //     assert!(
+    //         self.nodes.contains_key(dependent),
+    //         "Node does not exist on graph: {}", dependent
+    //     );
+
+    //     let mut node = self.nodes.get(node).unwrap().borrow_mut();
+    //     node.dependents.insert(dependent.to_string());
+
+    //     let mut dependent = self.nodes.get(dependent).unwrap().borrow_mut();
+    //     dependent.dependencies += 1;
+    // }
+
+    pub fn add(&mut self, node: DepNode) -> Ref<DepNode> {
         assert!(!self.nodes.contains_key(&node.name));
 
         let name = node.name.clone(); // TODO: Better way?
@@ -67,6 +97,8 @@ impl DepGraph {
             RefCell::new(node)
         );
         self.root_nodes.insert(name.clone());
+
+        self.nodes.get(&name).unwrap().borrow()
     }
 
     // TODO: Read up on the `where` syntax
