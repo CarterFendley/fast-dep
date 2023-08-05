@@ -15,6 +15,15 @@ pub fn find_spec(name: &str) -> PyResult<ModuleSpec> {
     })
 }
 
-pub fn resolve_name(name: &str, package: &str, level: &str) {
-    
+// Based on the following implementation:
+// https://github.com/python/cpython/blob/v3.9.0/Lib/importlib/_bootstrap.py#L883
+pub fn resolve_name(name: &String, package: &String, level: &usize) -> String {
+    let bits: Vec<&str> = package.split('.').collect();
+
+    let include = bits.len() - level;
+    if include < 0 {
+        panic!("Attempted relative import beyond top-level package");
+    }
+
+    format!("{}.{}", bits[..include].join("."), name)
 }

@@ -6,7 +6,7 @@ use std::io::prelude::*;
 
 use pyo3::prelude::*;
 
-use crate::importlib;
+use crate::importlib::*;
 use crate::minimal_parser::*;
 use super::types::*;
 
@@ -31,15 +31,18 @@ impl GraphBuilder {
     pub fn build(&mut self, source: &str) -> DepGraph {
         // Manually build spec / DepNode for first call
         let name = "<terminal>".to_string();
-        let spec = importlib::ModuleSpec {
+        let spec = ModuleSpec {
             name: name.clone(),
             origin: None,
+            // Treating this as the main file which is not a package
+            parent: "__main__".to_string(),
+            submodule_search_locations: None
         };
 
 
-        let node = DepNode::new(spec);
+        let node = DepNode::new(spec.clone());
         self.graph.add(node);
-        self._process_imports(&name, source);
+        self._process_imports(spec, source);
 
         mem::replace(&mut self.processing, HashSet::new());
         mem::replace(&mut self.graph, DepGraph::new())
@@ -75,14 +78,14 @@ impl GraphBuilder {
         return None
     }
 
-    pub fn _process_imports(&mut self, name: &String, source: &str) {
+    pub fn _process_imports(&mut self, spec: ModuleSpec, source: &str) {
         println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        println!("Expanding '{}'", name);
+        println!("Expanding '{}'", spec.name);
         println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
         // Circular check
-        assert!(!self.processing.contains(name), "Double processing detected for name: '{}'", name);
-        self.processing.insert(name.clone());
+        assert!(!self.processing.contains(&spec.name), "Double processing detected for name: '{}'", spec.name);
+        self.processing.insert(spec.name.clone());
 
         let stmts = parse(source);
         dump_imports(&stmts);
@@ -92,24 +95,63 @@ impl GraphBuilder {
                 ImportStmt::Import { names } => {
                     for alias in names {
                         // Don't care about asname, we only need the import name to analyze dependencies
-                        self._process_dependency(Some(name), &alias.name);
+                        self._process_dependency(Some(&spec.name), &alias.name);
                     }
                 },
                 ImportStmt::ImportFrom { module, names, level } => {
+                    if let (Some(module), Some(level)) = (module, level) {
+                        let module_name = if level != 0 {
+                            // Resolve name relative to the current package (parent in ModuleSpec)
+                            resolve_name (
+                                &module,
+                                &spec.parent,
+                                &level
+                            )
+                        } else {
+                            module
+                        };
 
+                        // Place dependency on the module
+                        self._process_dependency(
+                            Some(&spec.name),
+                            &module_name
+                        );
+
+                        // If this is a package we need to process the names b/c they may be submodules
+                        let module_spec: PyResult<ModuleSpec> = find_spec(
+                            &module_name
+                        );
+
+                        if let Ok(s) = module_spec {
+                            if s.is_package() {
+                                for alias in names {
+                                    self._process_dependency(
+                                        Some(&spec.name),
+                                        &format!(
+                                            "{}.{}",
+                                            module_name,
+                                            alias.name
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        panic!("Broken assumption of implementation, revist this block to see if there are issues.")
+                    }
                 }
             }
         }
-        self.processing.remove(name);
+        self.processing.remove(&spec.name);
         println!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        println!("Done '{}'", name);
+        println!("Done '{}'", spec.name);
         println!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }
 
     pub fn _process_dependency(&mut self, from: Option<&String>, name: &str) {
         // Maybe expensive but some values will change names after find_spec()
         // TODO: Deal with this in another way?
-        let spec: PyResult<importlib::ModuleSpec> = importlib::find_spec(name);
+        let spec: PyResult<ModuleSpec> = find_spec(name);
     
         if let Err(_) = spec {
             println!("!!!! Unable to find spec for name: '{}' !!!!", name);
@@ -163,12 +205,12 @@ impl GraphBuilder {
         }
 
         // At this point we must add the node ourselves
-        let new_node = DepNode::new(spec);
+        let new_node = DepNode::new(spec.clone());
         let source = self._load_source(&new_node);
         self.graph.add(new_node);
 
         if let Some(source) = source {
-            self._process_imports(&name.to_string(), source.as_str())
+            self._process_imports(spec, source.as_str())
         }
 
         // Finish by putting on graph and updating marking

@@ -3,15 +3,21 @@ use std::cell::{RefCell, Ref};
 use std::ops::Deref;
 
 use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyList};
 
 use crate::importlib;
 
 #[pyclass]
+#[derive(Clone)]
 pub struct DepNode {
+    #[pyo3(get)]
     pub name: String,
+    #[pyo3(get)]
     pub spec: importlib::ModuleSpec,
+    #[pyo3(get)]
     dependencies: i32,
     // The dependencies by spec.name
+    #[pyo3(get)]
     dependents: HashSet<String>
 }
 
@@ -29,6 +35,24 @@ impl DepNode {
         self.dependencies == 0
     }
 }
+
+// impl IntoPy<PyObject> for DepNode {
+//     fn into_py(self, py: Python<'_>) -> PyObject {
+//         let dict = PyDict::new(py);
+
+//         dict.set_item("name", self.name).unwrap();
+//         dict.set_item("spec", self.spec).unwrap();
+
+//         let dependents = PyList::new(py);
+//         for dependent in self.dependents {
+//             dependents.append(dependent).unwrap();
+//         }
+//         dict.set_item("dependents", dependents).unwrap();
+//         dict.set_item("dependencies", self.dependencies).unwrap();
+
+//         dict.into()
+//     }
+// }
 
 #[pyclass]
 pub struct DepGraph {
@@ -68,25 +92,6 @@ impl DepGraph {
         from.dependencies += 1;
     }
 
-    // pub fn add_dependent(&self, node: &str, dependent: &str) {
-    //     // Before performing an operation on either, make sure both exist
-    //     println!("Adding '{}' as dependent of '{}'.", dependent, node);
-    //     assert!(
-    //         self.nodes.contains_key(node),
-    //         "Node does not exist on graph: {}", node
-    //     );
-    //     assert!(
-    //         self.nodes.contains_key(dependent),
-    //         "Node does not exist on graph: {}", dependent
-    //     );
-
-    //     let mut node = self.nodes.get(node).unwrap().borrow_mut();
-    //     node.dependents.insert(dependent.to_string());
-
-    //     let mut dependent = self.nodes.get(dependent).unwrap().borrow_mut();
-    //     dependent.dependencies += 1;
-    // }
-
     pub fn add(&mut self, node: DepNode) -> Ref<DepNode> {
         assert!(!self.nodes.contains_key(&node.name));
 
@@ -123,5 +128,12 @@ impl DepGraph {
     pub fn keys(&self) -> HashSet<String> {
         // TODO: Probably expensive, faster to write a conversion for graph.keys() and Keys type?
         self.nodes.iter().map(|(key, _)| key.to_string()).collect()
+    }
+
+    pub fn get(&self, py: Python<'_>, name: &str) -> PyResult<DepNode> {
+        let node = self.nodes.get(name).unwrap().borrow();
+
+        return Ok( node.clone() )
+        //Ok( node.into_py(py) )
     }
 }
