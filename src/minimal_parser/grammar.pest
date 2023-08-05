@@ -22,23 +22,24 @@ expr = { comment | import | import_from | any_line }
 // The atomics make the line show up better (not seprated by WHITESPACE included in ~)
 any_line = @{ (!NEWLINE ~ ANY)+ }
 
-comment = { string_lit | comment_single }
+comment = { WHITESPACE* ~ (string_lit | comment_single) }
 // (!NEWLINE ~ ANY)*  --- Consume any chars which are not newlines
 // Predicates do not not consume chars: https://pest.rs/book/grammars/syntax.html#predicates
 comment_single = { "#" ~ (!NEWLINE ~ ANY)* }
 
-string_lit = { 
-	multiline_double_qouted |
+string_lit = @{ 
+	string_modifiers? ~
+    ( multiline_double_qouted |
     multiline_single_qouted |
     lit_double_qouted | 
-    lit_single_qouted
+    lit_single_qouted ) 
 }
 
 // Splitting out single and double into seperate rules becuase we can only terminate the string with the same char which started it.
-multiline_double_qouted = {"\"\"\"" ~ (!"\"\"\"" ~ ANY)* ~ "\"\"\"" }
-multiline_single_qouted = {"'''" ~ (!"'''" ~ ANY)* ~ "'''" }
-lit_double_qouted = {"\"" ~ (!("\"" | NEWLINE) ~ ANY)* ~ "\""}
-lit_single_qouted = {"'" ~ (!("'" | NEWLINE) ~ ANY)* ~ "'"}
+multiline_double_qouted = !{"\"\"\"" ~ (!"\"\"\"" ~ ANY)* ~ "\"\"\"" }
+multiline_single_qouted = !{"'''" ~ (!"'''" ~ ANY)* ~ "'''" }
+lit_double_qouted = !{"\"" ~ (!("\"" | NEWLINE) ~ ANY)* ~ "\""}
+lit_single_qouted = !{"'" ~ (!("'" | NEWLINE) ~ ANY)* ~ "'"}
 
 import = { "import " ~ alias_list}
 // The need for atomics in this one is to prevent the greedy consumption of spaces before " import" and inability to validate if that consumption occurred
@@ -71,3 +72,78 @@ qualified_name = ${ name ~ ("." ~ name)* }
 name = ${ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 
 whitespace_newline = { PATTERN_WHITE_SPACE | NEWLINE }
+
+// There has to be a way to make this simpler
+string_modifiers = {
+	m0 | m1 | m2 | m3 | m4 | m5 | m6 | m7 | m8 | m9
+	| m10 | m11 | m12 | m13 | m14 | m15 | m16 | m17 | m18 | m19
+	| m20 | m21 | m22 | m23 | m24 | m25 | m26 | m27 | m28 | m29
+	| m30 | m31 | m32 | m33 | m34 | m35 | m36 | m37 | m38 | m39
+	| m40 | m41 | m42 | m43 | m44 | m45 | m46 | m47 | m48 | m49
+	| m50 | m51 | m52 | m53 | m54 | m55 | m56 | m57 | m58 | m59
+	| m60 | m61 | m62 | m63
+}
+m0 = { ("r" | "R") ~ ("f" | "F") ~ ("u" | "U") }
+m1 = { ("b" | "B") ~ ("r" | "R") }
+m2 = { ("b" | "B") ~ ("r" | "R") ~ ("f" | "F") ~ ("u" | "U") }
+m3 = { ("f" | "F") ~ ("r" | "R") }
+m4 = { ("r" | "R") ~ ("f" | "F") ~ ("u" | "U") ~ ("b" | "B") }
+m5 = { ("r" | "R") ~ ("u" | "U") ~ ("b" | "B") ~ ("f" | "F") }
+m6 = { ("f" | "F") }
+m7 = { ("r" | "R") ~ ("b" | "B") ~ ("f" | "F") }
+m8 = { ("r" | "R") ~ ("f" | "F") ~ ("b" | "B") ~ ("u" | "U") }
+m9 = { ("r" | "R") ~ ("f" | "F") }
+m10 = { ("u" | "U") ~ ("b" | "B") ~ ("f" | "F") ~ ("r" | "R") }
+m11 = { ("f" | "F") ~ ("b" | "B") ~ ("r" | "R") }
+m12 = { ("f" | "F") ~ ("b" | "B") ~ ("r" | "R") ~ ("u" | "U") }
+m13 = { ("b" | "B") ~ ("u" | "U") }
+m14 = { ("b" | "B") ~ ("f" | "F") ~ ("r" | "R") }
+m15 = { ("u" | "U") }
+m16 = { ("f" | "F") ~ ("b" | "B") }
+m17 = { ("b" | "B") ~ ("u" | "U") ~ ("r" | "R") ~ ("f" | "F") }
+m18 = { ("b" | "B") ~ ("f" | "F") ~ ("u" | "U") }
+m19 = { ("r" | "R") ~ ("b" | "B") ~ ("u" | "U") }
+m20 = { ("b" | "B") ~ ("u" | "U") ~ ("f" | "F") ~ ("r" | "R") }
+m21 = { ("f" | "F") ~ ("u" | "U") ~ ("r" | "R") }
+m22 = { ("r" | "R") ~ ("u" | "U") }
+m23 = { ("u" | "U") ~ ("b" | "B") ~ ("r" | "R") }
+m24 = { ("r" | "R") ~ ("u" | "U") ~ ("f" | "F") ~ ("b" | "B") }
+m25 = { ("f" | "F") ~ ("u" | "U") ~ ("b" | "B") }
+m26 = { ("u" | "U") ~ ("r" | "R") ~ ("f" | "F") }
+m27 = { ("b" | "B") ~ ("r" | "R") ~ ("u" | "U") }
+m28 = { ("r" | "R") ~ ("b" | "B") }
+m29 = { ("u" | "U") ~ ("r" | "R") ~ ("b" | "B") ~ ("f" | "F") }
+m30 = { ("u" | "U") ~ ("f" | "F") ~ ("r" | "R") }
+m31 = { ("b" | "B") ~ ("f" | "F") ~ ("r" | "R") ~ ("u" | "U") }
+m32 = { ("b" | "B") ~ ("u" | "U") ~ ("r" | "R") }
+m33 = { ("f" | "F") ~ ("r" | "R") ~ ("b" | "B") ~ ("u" | "U") }
+m34 = { ("f" | "F") ~ ("r" | "R") ~ ("u" | "U") ~ ("b" | "B") }
+m35 = { ("f" | "F") ~ ("u" | "U") }
+m36 = { ("b" | "B") ~ ("f" | "F") ~ ("u" | "U") ~ ("r" | "R") }
+m37 = { ("r" | "R") ~ ("u" | "U") ~ ("b" | "B") }
+m38 = { ("u" | "U") ~ ("f" | "F") ~ ("b" | "B") }
+m39 = { ("u" | "U") ~ ("r" | "R") ~ ("b" | "B") }
+m40 = { ("b" | "B") ~ ("f" | "F") }
+m41 = { ("u" | "U") ~ ("f" | "F") ~ ("b" | "B") ~ ("r" | "R") }
+m42 = { ("b" | "B") ~ ("r" | "R") ~ ("f" | "F") }
+m43 = { ("b" | "B") ~ ("r" | "R") ~ ("u" | "U") ~ ("f" | "F") }
+m44 = { ("r" | "R") ~ ("f" | "F") ~ ("b" | "B") }
+m45 = { ("u" | "U") ~ ("r" | "R") }
+m46 = { ("r" | "R") }
+m47 = { ("f" | "F") ~ ("r" | "R") ~ ("b" | "B") }
+m48 = { ("b" | "B") }
+m49 = { ("u" | "U") ~ ("f" | "F") ~ ("r" | "R") ~ ("b" | "B") }
+m50 = { ("f" | "F") ~ ("b" | "B") ~ ("u" | "U") }
+m51 = { ("u" | "U") ~ ("b" | "B") ~ ("r" | "R") ~ ("f" | "F") }
+m52 = { ("u" | "U") ~ ("b" | "B") ~ ("f" | "F") }
+m53 = { ("f" | "F") ~ ("u" | "U") ~ ("r" | "R") ~ ("b" | "B") }
+m54 = { ("f" | "F") ~ ("r" | "R") ~ ("u" | "U") }
+m55 = { ("f" | "F") ~ ("b" | "B") ~ ("u" | "U") ~ ("r" | "R") }
+m56 = { ("r" | "R") ~ ("u" | "U") ~ ("f" | "F") }
+m57 = { ("r" | "R") ~ ("b" | "B") ~ ("u" | "U") ~ ("f" | "F") }
+m58 = { ("r" | "R") ~ ("b" | "B") ~ ("f" | "F") ~ ("u" | "U") }
+m59 = { ("b" | "B") ~ ("u" | "U") ~ ("f" | "F") }
+m60 = { ("u" | "U") ~ ("f" | "F") }
+m61 = { ("f" | "F") ~ ("u" | "U") ~ ("b" | "B") ~ ("r" | "R") }
+m62 = { ("u" | "U") ~ ("r" | "R") ~ ("f" | "F") ~ ("b" | "B") }
+m63 = { ("u" | "U") ~ ("b" | "B") }
