@@ -118,11 +118,11 @@ impl GraphBuilder {
                         );
 
                         // If this is a package we need to process the names b/c they may be submodules
-                        let module_spec: PyResult<ModuleSpec> = find_spec(
+                        let module_spec: Option<ModuleSpec> = find_spec(
                             &module_name
                         );
 
-                        if let Ok(s) = module_spec {
+                        if let Some(s) = module_spec {
                             if s.is_package() {
                                 for alias in names {
                                     self._process_dependency(
@@ -151,9 +151,9 @@ impl GraphBuilder {
     pub fn _process_dependency(&mut self, from: Option<&String>, name: &str) {
         // Maybe expensive but some values will change names after find_spec()
         // TODO: Deal with this in another way?
-        let spec: PyResult<ModuleSpec> = find_spec(name);
+        let spec: Option<ModuleSpec> = find_spec(name);
     
-        if let Err(_) = spec {
+        if spec.is_none() {
             println!("!!!! Unable to find spec for name: '{}' !!!!", name);
             return
         }

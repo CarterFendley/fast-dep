@@ -7,7 +7,7 @@ pub struct ModuleSpec {
     pub name: String,
     pub origin: Option<String>,
     pub parent: String,
-    pub submodule_search_locations: Option<String>
+    pub submodule_search_locations: Option<Vec<String>>
 }
 
 impl ModuleSpec {
