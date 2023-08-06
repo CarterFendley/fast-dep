@@ -60,7 +60,7 @@ impl GraphBuilder {
         self.graph.add(node);
         self._process_imports(spec, source);
 
-        mem::replace(&mut self.processing, HashSet::new());
+        let _ = mem::replace(&mut self.processing, HashSet::new());
         mem::replace(&mut self.graph, DepGraph::new())
     }
 }
