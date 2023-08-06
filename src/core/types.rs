@@ -4,7 +4,6 @@ use std::ops::Deref;
 use log::{debug};
 
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
 
 use crate::importlib;
 
@@ -32,6 +31,7 @@ impl DepNode {
         }
     }
 
+    #[allow(dead_code)]
     fn is_root(&self) -> bool {
         self.dependencies == 0
     }
@@ -71,9 +71,9 @@ impl DepGraph {
     }
 
     pub fn add_dependency(&self, from: &str, on: &str) {
-        /// This method will take a node which is currently under construction and updated it's dependencies.
-        /// 
-        /// **NOTE:** It is imperative that the `from` which is taken in and returned from this method is added to the graph at some point.
+        // This method will take a node which is currently under construction and updated it's dependencies.
+        // 
+        // **NOTE:** It is imperative that the `from` which is taken in and returned from this method is added to the graph at some point.
         debug!("Add dependency '{}' -> '{}'", from, on);
 
         // Make sure we have the `on` node
@@ -131,7 +131,7 @@ impl DepGraph {
         self.nodes.iter().map(|(key, _)| key.to_string()).collect()
     }
 
-    pub fn get(&self, py: Python<'_>, name: &str) -> PyResult<DepNode> {
+    pub fn get(&self, name: &str) -> PyResult<DepNode> {
         let node = self.nodes.get(name).unwrap().borrow();
 
         return Ok( node.clone() )

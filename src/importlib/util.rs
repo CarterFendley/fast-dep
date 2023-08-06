@@ -1,4 +1,3 @@
-use std::cmp;
 use pyo3::prelude::*;
 
 use super::types::*;
@@ -15,7 +14,7 @@ pub fn find_spec(name: &str) -> Option<ModuleSpec> {
         return Ok(spec)
     });
 
-    if let Err(err) = result {
+    if let Err(_) = result {
         // Python::with_gil(|py| {
         //     err.print(py);
         // });

@@ -20,7 +20,7 @@ pub fn parse(source: &str) -> Vec<ImportStmt> {
         match pair.as_rule() {
             Rule::import => {
                 // Pull the first inner value and validate it is a alias_list
-                let mut alias_list = pair.into_inner().next().unwrap();
+                let alias_list = pair.into_inner().next().unwrap();
                 assert_eq!(Rule::alias_list, alias_list.as_rule());
 
 
