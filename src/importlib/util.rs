@@ -38,15 +38,14 @@ pub fn resolve_name(name: &String, package: &String, level: &usize) -> String {
     // When level == 1 (".") no modification
     // When level == 2 ("..") strip one level of the package name
     // ....
-    let subtract = level - 1;
-    let include = bits.len() - subtract;
-    if include < 0 {
+    let include = bits.len().checked_sub(level - 1);
+    if include.is_none() {
         panic!("Attempted relative import beyond top-level package");
     }
 
     if name == ""{
-        bits[..include].join(".")
+        bits[..include.unwrap()].join(".")
     } else {
-        format!("{}.{}", bits[..include].join("."), name)
+        format!("{}.{}", bits[..include.unwrap()].join("."), name)
     }
 }
