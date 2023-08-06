@@ -137,4 +137,17 @@ impl DepGraph {
         return Ok( node.clone() )
         //Ok( node.into_py(py) )
     }
+
+    pub fn origins(&mut self) -> Vec<String> {
+        let mut origins = vec![];
+
+        for (_, node_cell) in &self.nodes {
+            let node = node_cell.borrow_mut();
+            if let Some(origin) = &node.spec.origin {
+                origins.push(origin.clone());
+            }
+        }
+
+        return origins
+    }
 }
