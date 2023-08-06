@@ -150,4 +150,15 @@ impl DepGraph {
 
         return origins
     }
+
+    pub fn names(&mut self) -> Vec<String> {
+        let mut names = vec![];
+
+        for (_, node_cell) in &self.nodes {
+            let node = node_cell.borrow_mut();
+            names.push(node.name.clone());
+        }
+
+        return names
+    }
 }
