@@ -28,15 +28,22 @@ impl GraphBuilder {
         builder
     }
 
-    pub fn build(&mut self, source: &str) -> DepGraph {
+    pub fn build(&mut self, source: &str, package: Option<String>) -> DepGraph {
+        // Trying to make source look like a package
+        let (package, dirs) = if let Some(package) = package {
+            (package, Some(vec![]))
+        } else {
+            ("<terminal>".to_string(), None)
+        };
+
         // Manually build spec / DepNode for first call
         let name = "<terminal>".to_string();
         let spec = ModuleSpec {
             name: name.clone(),
             origin: None,
             // Treating this as the main file which is not a package
-            parent: "__main__".to_string(),
-            submodule_search_locations: None
+            parent: package,
+            submodule_search_locations: dirs
         };
 
 
@@ -101,6 +108,10 @@ impl GraphBuilder {
                 ImportStmt::ImportFrom { module, names, level } => {
                     if let (Some(module), Some(level)) = (module, level) {
                         let module_name = if level != 0 {
+                            if spec.parent == "<terminal>" {
+                                panic!("Attempted relative import from terminal node (no known parent package)");
+                            }
+
                             // Resolve name relative to the current package (parent in ModuleSpec)
                             resolve_name (
                                 &module,

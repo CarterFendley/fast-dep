@@ -1,3 +1,4 @@
+use std::cmp;
 use pyo3::prelude::*;
 
 use super::types::*;
@@ -30,7 +31,15 @@ pub fn find_spec(name: &str) -> Option<ModuleSpec> {
 pub fn resolve_name(name: &String, package: &String, level: &usize) -> String {
     let bits: Vec<&str> = package.split('.').collect();
 
-    let include = bits.len() - level;
+    if *level == 0 {
+        panic!("This method has no meaning when level == 0");
+    }
+
+    // When level == 1 (".") no modification
+    // When level == 2 ("..") strip one level of the package name
+    // ....
+    let subtract = level - 1;
+    let include = bits.len() - subtract;
     if include < 0 {
         panic!("Attempted relative import beyond top-level package");
     }
