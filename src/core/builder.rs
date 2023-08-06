@@ -3,6 +3,7 @@ use std::mem;
 use std::path::Path;
 use std::fs::File;
 use std::io::prelude::*;
+use log::{debug};
 
 use pyo3::prelude::*;
 
@@ -13,16 +14,24 @@ use super::types::*;
 #[pyclass]
 pub struct GraphBuilder {
     pub graph: DepGraph,
-    processing: HashSet<String>
+    processing: HashSet<String>,
+    verbose: bool
 }
 
 #[pymethods]
 impl GraphBuilder {
     #[new]
-    pub fn new() -> Self {
+    pub fn new(verbose: Option<bool>) -> Self {
+        let verbose = if let Some(verbose) = verbose {
+            verbose
+        } else {
+            false
+        };
+
         let builder = GraphBuilder {
             graph: DepGraph::new(),
-            processing: HashSet::new()
+            processing: HashSet::new(),
+            verbose: verbose
         };
 
         builder
@@ -74,7 +83,7 @@ impl GraphBuilder {
                 panic!("Unable to load extension for path: {}", path_str);
             }
 
-            println!("Loading file: {}", path_str);
+            debug!("Loading file: {}", path_str);
             let mut source_file = File::open(Path::new(source_path)).unwrap();
             let mut source = String::new();
 
@@ -86,16 +95,18 @@ impl GraphBuilder {
     }
 
     pub fn _process_imports(&mut self, spec: ModuleSpec, source: &str) {
-        println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        println!("Expanding '{}'", spec.name);
-        println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        debug!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        debug!("Expanding '{}'", spec.name);
+        debug!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
         // Circular check
         assert!(!self.processing.contains(&spec.name), "Double processing detected for name: '{}'", spec.name);
         self.processing.insert(spec.name.clone());
 
         let stmts = parse(source);
-        dump_imports(&stmts);
+        if self.verbose {
+            dump_imports(&stmts);
+        }
 
         for stmt in stmts {
             match stmt {
@@ -154,9 +165,9 @@ impl GraphBuilder {
             }
         }
         self.processing.remove(&spec.name);
-        println!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        println!("Done '{}'", spec.name);
-        println!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        debug!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        debug!("Done '{}'", spec.name);
+        debug!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }
 
     pub fn _process_dependency(&mut self, from: Option<&String>, name: &str) {
@@ -165,7 +176,7 @@ impl GraphBuilder {
         let spec: Option<ModuleSpec> = find_spec(name);
     
         if spec.is_none() {
-            println!("!!!! Unable to find spec for name: '{}' !!!!", name);
+            debug!("!!!! Unable to find spec for name: '{}' !!!!", name);
             return
         }
 
@@ -181,9 +192,9 @@ impl GraphBuilder {
         }
 
         if let Some(from) = from {
-            println!("Processing dependency: {} -> {}", from, name);
+            debug!("Processing dependency: {} -> {}", from, name);
         } else {
-            println!("Processing dependency on: {}", name);
+            debug!("Processing dependency on: {}", name);
         }
 
 

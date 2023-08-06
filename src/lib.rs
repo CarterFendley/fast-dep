@@ -14,6 +14,8 @@ mod importlib;
 
 #[pymodule]
 fn fast_dep(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    pyo3_log::init();
+
     m.add_class::<core::DepNode>()?;
     m.add_class::<core::DepGraph>()?;
     m.add_class::<core::GraphBuilder>()?;

@@ -1,6 +1,7 @@
 use std::collections::{HashSet, HashMap};
 use std::cell::{RefCell, Ref};
 use std::ops::Deref;
+use log::{debug};
 
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
@@ -73,7 +74,7 @@ impl DepGraph {
         /// This method will take a node which is currently under construction and updated it's dependencies.
         /// 
         /// **NOTE:** It is imperative that the `from` which is taken in and returned from this method is added to the graph at some point.
-        println!("Add dependency '{}' -> '{}'", from, on);
+        debug!("Add dependency '{}' -> '{}'", from, on);
 
         // Make sure we have the `on` node
         assert!(
