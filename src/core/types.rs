@@ -151,6 +151,10 @@ impl DepGraph {
     }
 
     pub fn get(&self, name: &str) -> PyResult<DepNode> {
+        assert!(
+            self.nodes.contains_key(name),
+            "Node does not exist on graph: {}", name
+        );
         let node = self.nodes.get(name).unwrap().borrow();
 
         return Ok( node.clone() )
