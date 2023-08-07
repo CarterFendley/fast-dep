@@ -161,6 +161,19 @@ impl DepGraph {
         //Ok( node.into_py(py) )
     }
 
+    pub fn get_all_scoped(&self, scope: &str) -> PyResult<Vec<DepNode>> {
+        let mut nodes = vec![];
+
+        for (_, node_cell) in &self.nodes {
+            let node = node_cell.borrow();
+            if node.name.starts_with(scope) {
+                nodes.push(node.clone());
+            }
+        }
+
+        return Ok(nodes)
+    }
+
     pub fn origins(&mut self) -> Vec<String> {
         let mut origins = vec![];
 

@@ -3,6 +3,8 @@ import sys
 import inspect
 import logging
 
+from pytest_unordered import unordered
+
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 RES_DIR = os.path.abspath(
     os.path.join(THIS_DIR, 'res')
@@ -55,4 +57,10 @@ def test_module_dep():
         assert actual.dependencies == expected['dependencies']
         assert actual.dependents == expected['dependents']
         assert actual.depth == expected['depth']
+
+    scope_test = graph.get_all_scoped('test_packages.module_dep')
+    assert [node.name for node in scope_test] == unordered([
+        'test_packages.module_dep.file',
+        'test_packages.module_dep',
+    ])
 
