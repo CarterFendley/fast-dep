@@ -1,6 +1,7 @@
 import os
 import sys
 import inspect
+import logging
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 RES_DIR = os.path.abspath(
@@ -26,21 +27,25 @@ def test_module_dep():
             'name': 'test_packages.module_dep.file',
             'dependencies': 0,
             'dependents': {'test_packages.module_dep'},
+            'depth': 2
         },
         {
             'name': 'test_packages.module_dep',
             'dependencies': 1,
-            'dependents': {'<terminal>'}
+            'dependents': {'<terminal>'},
+            'depth': 1
         },
         {
             'name': 'test_packages',
             'dependencies': 0,
-            'dependents': {'<terminal>'}
+            'dependents': {'<terminal>'},
+            'depth': 1
         },
         {
             'name': '<terminal>',
             'dependencies': 3,
-            'dependents': set()
+            'dependents': set(),
+            'depth': 0
         }
     ]
 
@@ -49,4 +54,5 @@ def test_module_dep():
         print(expected['name'])
         assert actual.dependencies == expected['dependencies']
         assert actual.dependents == expected['dependents']
+        assert actual.depth == expected['depth']
 

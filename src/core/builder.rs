@@ -56,7 +56,7 @@ impl GraphBuilder {
         };
 
 
-        let node = DepNode::new(spec.clone());
+        let node = DepNode::new(spec.clone(), Some(0));
         self.graph.add(node);
         self._process_imports(spec, source);
 
@@ -227,20 +227,22 @@ impl GraphBuilder {
         }
 
         // At this point we must add the node ourselves
-        let new_node = DepNode::new(spec.clone());
+        // None for depth to allow that to be resolved by add_dependency(...)
+        let new_node = DepNode::new(spec.clone(), None);
         let source = self._load_source(&new_node);
         self.graph.add(new_node);
 
-        if let Some(source) = source {
-            self._process_imports(spec, source.as_str())
-        }
-
-        // Finish by putting on graph and updating marking
+        // Add dependency from current node, to this new one
         if let Some(from) = from {
             self.graph.add_dependency(
                 &from,
                 &name
             );
+        }
+
+        // Process all dependencies of new node
+        if let Some(source) = source {
+            self._process_imports(spec, source.as_str())
         }
 
         // Done!

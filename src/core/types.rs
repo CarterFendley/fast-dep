@@ -18,16 +18,19 @@ pub struct DepNode {
     dependencies: i32,
     // The dependencies by spec.name
     #[pyo3(get)]
-    dependents: HashSet<String>
+    dependents: HashSet<String>,
+    #[pyo3(get)]
+    depth: Option<i32>
 }
 
 impl DepNode {
-    pub fn new(spec: importlib::ModuleSpec) -> DepNode {
+    pub fn new(spec: importlib::ModuleSpec, depth: Option<i32>) -> DepNode {
         DepNode {
             name: spec.name.clone(),
             spec: spec,
             dependencies: 0,
-            dependents: HashSet::new()
+            dependents: HashSet::new(),
+            depth: depth // Allow for uninitialized depths
         }
     }
 
@@ -91,10 +94,26 @@ impl DepGraph {
 
         let mut from = self.nodes.get(from).unwrap().borrow_mut();
         from.dependencies += 1;
+
+        // Update depth relative to terminal node
+        assert!(!from.depth.is_none(), "Attempted to add dependency from node with uninitialized depth named: {}", from.name);
+
+        let current_depth = from.depth.unwrap() + 1 ;
+        if let Some(depth) = on.depth {
+            if depth > current_depth {
+                debug!("Found shorter depth to '{}' new depth is {}", on.name, current_depth);
+                on.depth = Some(current_depth);
+            }
+        } else {
+            debug!("Initializing depth of node '{}' to {}", on.name, current_depth);
+            // If uninitialized, initialize 
+            on.depth = Some(current_depth);
+        }
     }
 
     pub fn add(&mut self, node: DepNode) -> Ref<DepNode> {
         assert!(!self.nodes.contains_key(&node.name));
+        debug!("Adding node to graph: {}", node.name);
 
         let name = node.name.clone(); // TODO: Better way?
 
