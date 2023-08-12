@@ -45,7 +45,7 @@ def test_module_dep():
         },
         {
             'name': '<terminal>',
-            'dependencies': 3,
+            'dependencies': 2,
             'dependents': set(),
             'depth': 0
         }

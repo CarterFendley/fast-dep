@@ -14,9 +14,8 @@ pub struct DepNode {
     pub name: String,
     #[pyo3(get)]
     pub spec: importlib::ModuleSpec,
-    #[pyo3(get)]
-    dependencies: i32,
-    // The dependencies by spec.name
+    // The dependencies & dependents by spec.name
+    dependencies: HashSet<String>,
     #[pyo3(get)]
     dependents: HashSet<String>,
     #[pyo3(get)]
@@ -28,37 +27,44 @@ impl DepNode {
         DepNode {
             name: spec.name.clone(),
             spec: spec,
-            dependencies: 0,
+            dependencies: HashSet::new(),
             dependents: HashSet::new(),
             depth: depth // Allow for uninitialized depths
         }
     }
 
+    fn merge(&mut self, other: DepNode) {
+        // Few sanity checks
+        assert!(self.name == other.name);
+        if let Some(origin) = &self.spec.origin {
+            assert!(origin == &other.spec.origin.unwrap());
+        }
+
+        // Merge data
+        self.dependencies.extend(other.dependencies);
+        self.dependents.extend(other.dependents);
+        if other.depth < self.depth {
+            self.depth = other.depth
+        }
+    }
+
     #[allow(dead_code)]
     fn is_root(&self) -> bool {
-        self.dependencies == 0
+        self.dependencies.len() == 0
     }
 }
 
-// impl IntoPy<PyObject> for DepNode {
-//     fn into_py(self, py: Python<'_>) -> PyObject {
-//         let dict = PyDict::new(py);
-
-//         dict.set_item("name", self.name).unwrap();
-//         dict.set_item("spec", self.spec).unwrap();
-
-//         let dependents = PyList::new(py);
-//         for dependent in self.dependents {
-//             dependents.append(dependent).unwrap();
-//         }
-//         dict.set_item("dependents", dependents).unwrap();
-//         dict.set_item("dependencies", self.dependencies).unwrap();
-
-//         dict.into()
-//     }
-// }
+#[pymethods]
+impl DepNode {
+    #[getter]
+    fn dependencies(&self) -> PyResult<usize> {
+        println!("{}", self.dependencies.len());
+        Ok(self.dependencies.len())
+    }
+}
 
 #[pyclass]
+#[derive(Clone)]
 pub struct DepGraph {
     pub nodes: HashMap<String, RefCell<DepNode>>,
     root_nodes: HashSet<String>
@@ -89,25 +95,25 @@ impl DepGraph {
             "Node does not exist on graph: {}", on
         );
 
-        let mut on = self.nodes.get(on).unwrap().borrow_mut();
-        on.dependents.insert(from.to_string());
+        let mut on_node = self.nodes.get(on).unwrap().borrow_mut();
+        on_node.dependents.insert(from.to_string());
 
-        let mut from = self.nodes.get(from).unwrap().borrow_mut();
-        from.dependencies += 1;
+        let mut from_node = self.nodes.get(from).unwrap().borrow_mut();
+        from_node.dependencies.insert(on.to_string());
 
         // Update depth relative to terminal node
-        assert!(!from.depth.is_none(), "Attempted to add dependency from node with uninitialized depth named: {}", from.name);
+        assert!(!from_node.depth.is_none(), "Attempted to add dependency from node with uninitialized depth named: {}", from_node.name);
 
-        let current_depth = from.depth.unwrap() + 1 ;
-        if let Some(depth) = on.depth {
+        let current_depth = from_node.depth.unwrap() + 1 ;
+        if let Some(depth) = on_node.depth {
             if depth > current_depth {
-                debug!("Found shorter depth to '{}' new depth is {}", on.name, current_depth);
-                on.depth = Some(current_depth);
+                debug!("Found shorter depth to '{}' new depth is {}", on_node.name, current_depth);
+                on_node.depth = Some(current_depth);
             }
         } else {
-            debug!("Initializing depth of node '{}' to {}", on.name, current_depth);
+            debug!("Initializing depth of node '{}' to {}", on_node.name, current_depth);
             // If uninitialized, initialize 
-            on.depth = Some(current_depth);
+            on_node.depth = Some(current_depth);
         }
     }
 
@@ -136,6 +142,19 @@ impl DepGraph {
     pub fn has_node(&self, name: &str) -> bool {
         self.nodes.contains_key(name)
     }
+
+    pub fn merge(&mut self, other: DepGraph) {
+        for (name, node_cell) in other.nodes {
+            if self.nodes.contains_key(&name) {
+                // Just update the data
+                let mut existing = self.nodes.get(&name).unwrap().borrow_mut();
+                existing.merge(node_cell.into_inner());
+            } else {
+                // Add the whole node
+                self.add(node_cell.into_inner());
+            }
+        }
+    }
 }
 
 
@@ -158,7 +177,6 @@ impl DepGraph {
         let node = self.nodes.get(name).unwrap().borrow();
 
         return Ok( node.clone() )
-        //Ok( node.into_py(py) )
     }
 
     pub fn get_all_scoped(&self, scope: &str) -> PyResult<Vec<DepNode>> {
