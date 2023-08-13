@@ -274,7 +274,6 @@ impl GraphBuilder {
 
                         // Track metadata
                         let deps_added = subgraph.num_dependencies();
-                        info!("{}", deps_added);
                         self.metadata.from_cache += deps_added + 1;
                         self.metadata.processed += deps_added;
 

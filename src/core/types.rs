@@ -1,7 +1,7 @@
 use std::collections::{HashSet, HashMap, BTreeSet};
 use std::cell::{RefCell, Ref};
 use std::ops::Deref;
-use log::{debug, info};
+use log::{debug};
 
 use pyo3::prelude::*;
 
@@ -245,8 +245,6 @@ impl DepGraph {
         let mut acc = 0;
         for (_, node_cell) in &self.nodes {
             let node = node_cell.borrow();
-            info!("{}", node.name);
-            info!("{}", node.dependencies.len());
             acc += node_cell.borrow().dependencies.len();
         }
 
