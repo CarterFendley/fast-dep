@@ -1,4 +1,4 @@
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashSet, HashMap, BTreeSet};
 use std::cell::{RefCell, Ref};
 use std::ops::Deref;
 use log::{debug, info};
@@ -194,15 +194,16 @@ impl DepGraph {
         assert!(self.has_node(name));
         let mut clone = DepGraph::new();
 
-        let mut to_clone = vec![name.to_string()];
-        while let Some(name) = to_clone.pop() {
+        let mut to_clone = BTreeSet::new();
+        to_clone.insert(name.to_string());
+        while let Some(name) = to_clone.pop_first() {
             let node = self.nodes.get(&name).unwrap().borrow();
             clone.add(node.clone());
 
             // Mark all dependencies which are a not yet in the cloned graph as needed to clone
             for dep in &node.dependencies {
                 if !clone.has_node(&dep) {
-                    to_clone.push(dep.clone());
+                    to_clone.insert(dep.clone());
                 }
             }
         }

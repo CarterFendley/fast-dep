@@ -7,7 +7,7 @@ from pytest_unordered import unordered
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 RES_DIR = os.path.abspath(
-    os.path.join(THIS_DIR, 'res')
+    os.path.join(THIS_DIR, '../res')
 )
 sys.path.append(RES_DIR)
 
