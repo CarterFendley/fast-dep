@@ -3,7 +3,7 @@ use std::mem;
 use std::path::Path;
 use std::fs::File;
 use std::io::prelude::*;
-use log::{debug};
+use log::{debug, info};
 
 use pyo3::prelude::*;
 
@@ -11,11 +11,27 @@ use crate::importlib::*;
 use crate::minimal_parser::*;
 use super::types::*;
 
+pub struct BuildMetadata {
+    pub processed: usize,
+    pub from_cache: usize,
+}
+
+impl BuildMetadata {
+    pub fn new() -> BuildMetadata {
+        BuildMetadata {
+            processed: 0,
+            from_cache: 0,
+        }
+    }
+}
+
 #[pyclass]
 pub struct GraphBuilder {
     pub graph: DepGraph,
     processing: HashSet<String>,
-    verbose: bool
+    verbose: bool,
+    cache: Option<DepGraph>,
+    metadata: BuildMetadata
 }
 
 #[pymethods]
@@ -31,7 +47,9 @@ impl GraphBuilder {
         let builder = GraphBuilder {
             graph: DepGraph::new(),
             processing: HashSet::new(),
-            verbose: verbose
+            verbose: verbose,
+            cache: None,
+            metadata: BuildMetadata::new(),
         };
 
         builder
@@ -60,8 +78,33 @@ impl GraphBuilder {
         self.graph.add(node);
         self._process_imports(spec, source);
 
+        if self.metadata.from_cache == 0 {
+            info!(
+                "Processed {} dependency relationships.",
+                self.metadata.processed
+            );
+        } else {
+            info!(
+                "Processed {} dependency relationships ({} from cache).",
+                self.metadata.processed,
+                self.metadata.from_cache
+            );
+        }
+
+        // Reset for next build
         let _ = mem::replace(&mut self.processing, HashSet::new());
-        mem::replace(&mut self.graph, DepGraph::new())
+        let _ = mem::replace(&mut self.metadata, BuildMetadata::new());
+        let graph = mem::replace(&mut self.graph, DepGraph::new());
+
+        // Cache all nodes
+        let to_cache = graph.clone();
+        if let Some(cache) = self.cache.as_mut() {
+            cache.merge(to_cache)
+        } else {
+            self.cache = Some(to_cache)
+        }
+
+        return graph
     }
 }
 
@@ -191,6 +234,7 @@ impl GraphBuilder {
             }
         }
 
+        self.metadata.processed += 1;
         if let Some(from) = from {
             debug!("Processing dependency: {} -> {}", from, name);
         } else {
@@ -206,14 +250,51 @@ impl GraphBuilder {
 
             // Done!
             return
+        } else if name != "<terminal>" {
+            if !self.cache.is_none() {
+                if self.cache.as_ref().unwrap().has_node(&name) {
+                    // Process the parent and see if that adds the node first
+                    self._process_parent(from, &name);
+
+                    // Spooky!
+                    // TODO: This logic is 1 to 1 with logic further down, combine?
+                    if self.graph.has_node(&name) {
+                        if let Some(from) = from {
+                            self.graph.add_dependency(&from, &name);
+                        }
+
+                        // Done!
+                        return
+                    }
+
+                    // Other wise need to add ourselves
+                    let cache = self.cache.as_ref().unwrap();
+                    if let Some(from) = from {
+                        let subgraph = cache.clone_from(&name);
+
+                        // Track metadata
+                        let deps_added = subgraph.num_dependencies();
+                        info!("{}", deps_added);
+                        self.metadata.from_cache += deps_added + 1;
+                        self.metadata.processed += deps_added;
+
+                        self.graph.add_graph(
+                            from,
+                            &name,
+                            subgraph
+                        );
+
+                        // Done!
+                        return
+                    } else {
+                        panic!("Adding graph without `from` is not implemented")
+                    }
+                }
+            }
         }
 
         // Process parent before anything else
-        let names: Vec<&str> = name.split(".").collect();
-        let parent = names[..names.len() - 1].join(".");
-        if parent.len() != 0 {
-            self._process_dependency(from, parent.as_str());
-        }
+        self._process_parent(from, &name);
 
         // During processing of the parent, the current name may be added to the graph
         if self.graph.has_node(&name) {
@@ -246,5 +327,13 @@ impl GraphBuilder {
         }
 
         // Done!
+    }
+
+    fn _process_parent(&mut self, from: Option<&String>, name: &str) {
+        let names: Vec<&str> = name.split(".").collect();
+        let parent = names[..names.len() - 1].join(".");
+        if parent.len() != 0 {
+            self._process_dependency(from, parent.as_str());
+        }
     }
 }

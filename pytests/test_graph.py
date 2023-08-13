@@ -64,3 +64,8 @@ def test_module_dep():
         'test_packages.module_dep',
     ])
 
+    graph = builder.build(
+        inspect.getsource(import_module_dep),
+        package='test_packages'
+    )
+

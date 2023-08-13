@@ -1,7 +1,7 @@
 use std::collections::{HashSet, HashMap};
 use std::cell::{RefCell, Ref};
 use std::ops::Deref;
-use log::{debug};
+use log::{debug, info};
 
 use pyo3::prelude::*;
 
@@ -132,6 +132,53 @@ impl DepGraph {
         self.nodes.get(&name).unwrap().borrow()
     }
 
+    pub fn add_graph(&mut self, from: &str, on: &str, graph: DepGraph) {
+        debug!(
+            "Adding graph with {} nodes linked by {} -> {}",
+            graph.nodes.len(),
+            from,
+            on
+        );
+        assert!(
+            self.nodes.contains_key(from),
+            "Node does not exist on graph: {}", from
+        );
+        assert!(
+            graph.nodes.contains_key(on),
+            "Node does not exist on graph: {}", on
+        );
+
+        // Uninitialize depth from previous graph
+        for (_, node_cell) in &graph.nodes {
+            let mut node = node_cell.borrow_mut();
+            node.depth = None;
+        }
+
+        // TODO: Really should be a better way than cloning here
+        let from_node = self.nodes.get(from).unwrap().borrow().clone();
+        let on_node = graph.nodes.get(on).unwrap().borrow().clone();
+
+        // Construct the depth from the 
+        let mut current_depth = from_node.depth.unwrap();
+        let mut to_process = vec![on_node.name.clone()];
+        while let Some(name) = to_process.pop() {
+            let mut node = graph.nodes.get(&name).unwrap().borrow_mut();
+
+            // If node depth is already set it has been set by a previous path
+            if node.depth.is_none() {
+                node.depth = Some(current_depth);
+
+                // Make sure we process the dependencies of this node
+                to_process.extend(node.dependencies.iter().cloned());
+                current_depth += 1;
+            }
+        }
+
+        // Finally merge graphs and add dependency on proper nodes
+        self.merge(graph);
+        self.add_dependency(from, on); // On will now be a part of the graph
+    }
+
     // TODO: Read up on the `where` syntax
     pub fn with<F>(self, name: &str, f: F) where F: Fn(&DepNode) {
         let node = self.nodes.get(name).unwrap().borrow();
@@ -141,6 +188,35 @@ impl DepGraph {
 
     pub fn has_node(&self, name: &str) -> bool {
         self.nodes.contains_key(name)
+    }
+
+    pub fn clone_from(&self, name: &str) -> DepGraph {
+        assert!(self.has_node(name));
+        let mut clone = DepGraph::new();
+
+        let mut to_clone = vec![name.to_string()];
+        while let Some(name) = to_clone.pop() {
+            let node = self.nodes.get(&name).unwrap().borrow();
+            clone.add(node.clone());
+
+            // Mark all dependencies which are a not yet in the cloned graph as needed to clone
+            for dep in &node.dependencies {
+                if !clone.has_node(&dep) {
+                    to_clone.push(dep.clone());
+                }
+            }
+        }
+
+        // We now have a subset of nodes, remove any node `dependents` which were not copied over
+        for (_, node_cell) in &clone.nodes {
+            let mut node = node_cell.borrow_mut();
+
+            // Remove non existent dependents
+            // TODO: Docs show |&dep| like signature, but that failed?
+            node.dependents.retain(|dep| clone.has_node(dep.as_str()));
+        }
+
+        return clone
     }
 
     pub fn merge(&mut self, other: DepGraph) {
@@ -162,6 +238,18 @@ impl DepGraph {
 impl DepGraph {
     pub fn size(&self) -> usize {
         self.nodes.len()
+    }
+
+    pub fn num_dependencies(&self) -> usize {
+        let mut acc = 0;
+        for (_, node_cell) in &self.nodes {
+            let node = node_cell.borrow();
+            info!("{}", node.name);
+            info!("{}", node.dependencies.len());
+            acc += node_cell.borrow().dependencies.len();
+        }
+
+        return acc
     }
 
     pub fn keys(&self) -> HashSet<String> {
