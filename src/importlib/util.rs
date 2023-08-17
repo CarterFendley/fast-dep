@@ -1,3 +1,4 @@
+use log::{debug};
 use pyo3::prelude::*;
 
 use super::types::*;
@@ -11,6 +12,9 @@ pub fn find_spec(name: &str) -> Option<ModuleSpec> {
             .call1((name, ))?
             .extract()?;
 
+        if let Some(spec) = &spec {
+            debug!("Loaded spec: {} {:?}", spec.name, spec.origin);
+        }
         return Ok(spec)
     });
 

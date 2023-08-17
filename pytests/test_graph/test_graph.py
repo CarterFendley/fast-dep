@@ -2,6 +2,7 @@ import os
 import sys
 import inspect
 import logging
+from importlib.machinery import ModuleSpec
 
 from pytest_unordered import unordered
 
@@ -69,3 +70,32 @@ def test_module_dep():
         package='test_packages'
     )
 
+def test_no_extension(mocker):
+    find_spec = mocker.patch('importlib.util.find_spec')
+
+    find_spec.return_value = ModuleSpec(
+        name='dne',
+        loader=None,
+        origin='/does/not/exist'
+    )
+
+    builder = GraphBuilder()
+    builder.build(
+        inspect.getsource(bad_path),
+        package='test_packages'
+    )
+
+def test_bad_path(mocker):
+    find_spec = mocker.patch('importlib.util.find_spec')
+
+    find_spec.return_value = ModuleSpec(
+        name='dne',
+        loader=None,
+        origin='/does/not/exist.py'
+    )
+
+    builder = GraphBuilder()
+    builder.build(
+        inspect.getsource(bad_path),
+        package='test_packages'
+    )

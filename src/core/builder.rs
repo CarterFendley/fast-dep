@@ -3,7 +3,7 @@ use std::mem;
 use std::path::Path;
 use std::fs::File;
 use std::io::prelude::*;
-use log::{debug, info};
+use log::{debug, info, warn};
 
 use pyo3::prelude::*;
 
@@ -123,14 +123,28 @@ impl GraphBuilder {
                     return None
                 }
             } else {
-                panic!("Unable to load extension for path: {}", path_str);
+                warn!(
+                    "Unable to load extension for spec '{}' with origin '{}' skipping.",
+                    node.spec.name,
+                    path_str
+                );
+                return None
             }
 
             debug!("Loading file: {}", path_str);
-            let mut source_file = File::open(Path::new(source_path)).unwrap();
+            let mut source_file = File::open(Path::new(source_path));
+            if let Err(err) = source_file {
+                warn!(
+                    "Unable to load file for spec '{}' with origin '{}' skipping.",
+                    node.spec.name,
+                    path_str,
+                );
+                eprintln!("System error: {err}");
+                return None
+            }
             let mut source = String::new();
 
-            source_file.read_to_string(&mut source).unwrap();
+            source_file.unwrap().read_to_string(&mut source).unwrap();
             return Some(source)
         }
 
