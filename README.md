@@ -4,10 +4,12 @@
 pip install fast-dep
 ```
 
-**NOTE:** There is currently some issue with running PyO3 code in MacOS conda environments. We currently recommend using `pyenv` installs which work on that OS.
+**NOTE:** There is currently some issue with running PyO3 code in MacOS conda environments, see more details [here]. We currently recommend using `pyenv` installs which work on that OS. See instruction below.
 
 
 ## Installing PyEnv (For MacOS)
+
+Install `pyenv`.
 
 ```
 brew install pyenv
@@ -19,11 +21,16 @@ Place the following in your `.zshrc` or `.profile`.
 eval "$(pyenv init -)"
 ```
 
-Install a specific version of Python and get a shell with that interpreter.
+Install a specific version of Python.
 
 ```
-pyenv install <3.X>
-pyenv shell <3.X>
+PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install X.Y.Z
+```
+
+Get a shell with this previously installed Python version.
+
+```
+pyenv shell X.Y.Z
 ```
 
 Then install fast dep.
@@ -38,4 +45,11 @@ Install rust from [rustup.rs](https://rustup.rs/) then run the following to buil
 
 ```
 pip install -e .
+```
+
+You can also build without installing by using the following method
+
+```
+pip install maturin
+maturin build
 ```

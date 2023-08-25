@@ -10,11 +10,3 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-
-[[tool.maturin.targets]]
-name = "fast_dep"
-kind = "lib"
-
-[[tool.maturin.targets]]
-name = "fast-dep"
-kind = "bin"
