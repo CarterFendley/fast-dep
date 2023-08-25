@@ -1,24 +1,41 @@
 # fast-dep
 
 ```
-brew install pyenv
-pyenv install 3.7.17
+pip install fast-dep
 ```
 
-Maybe:
+**NOTE:** There is currently some issue with running PyO3 code in MacOS conda environments. We currently recommend using `pyenv` installs which work on that OS.
+
+
+## Installing PyEnv (For MacOS)
+
+```
+brew install pyenv
+```
+
+Place the following in your `.zshrc` or `.profile`.
 
 ```
 eval "$(pyenv init -)"
 ```
 
-Build binary and install:
+Install a specific version of Python and get a shell with that interpreter.
 
 ```
-maturin build -b "bin" && pip install --force-reinstall target/wheels/*.whl
+pyenv install <3.X>
+pyenv shell <3.X>
 ```
 
-Build and install the package: 
+Then install fast dep.
 
 ```
-maturin build && pip install --force-reinstall target/wheels/*.whl
+pip install fast-dep
+```
+
+## Building from source
+
+Install rust from [rustup.rs](https://rustup.rs/) then run the following to build the python package for your current environment.
+
+```
+pip install -e .
 ```
