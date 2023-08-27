@@ -4,9 +4,23 @@ build-backend = "maturin"
 
 [project]
 name = "fast_dep"
+description = "Fast python depdency tracing."
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+]
+license = "MIT"
+authors = [
+    {name = "Carter Fendley"}
+]
+homepage = "https://github.com/CarterFendley/fast-dep"
+repository = "https://github.com/CarterFendley/fast-dep"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-mock",
+    "pytest-unordered"
 ]

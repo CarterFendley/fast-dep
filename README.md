@@ -1,5 +1,7 @@
 # fast-dep
 
+Fast python dependency tracing, from Rust.
+
 ```
 pip install fast-dep
 ```
@@ -39,17 +41,25 @@ Then install fast dep.
 pip install fast-dep
 ```
 
-## Building from source
+## Development
+
+#### Building from source
 
 Install rust from [rustup.rs](https://rustup.rs/) then run the following to build the python package for your current environment.
 
 ```
-pip install -e .
+pip install -e ".[test]"
 ```
 
-You can also build without installing by using the following method
+You can also build without installing by using the following method.
 
 ```
 pip install maturin
 maturin build
+```
+
+#### Running tests
+
+```
+python -m pytest pytests
 ```
