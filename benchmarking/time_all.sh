@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+#set -e
 
 benchmarks=(
     "bench_modulegraph.py"

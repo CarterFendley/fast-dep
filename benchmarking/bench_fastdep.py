@@ -16,7 +16,8 @@ with timer:
     with open(spec.origin) as f:
         source = f.read()
     graph = b.build(
-        source=source
+        source=source,
+        package=spec.parent
     )
 
 print(f"Traced module '{module}': {timer.latest_cumtime}")

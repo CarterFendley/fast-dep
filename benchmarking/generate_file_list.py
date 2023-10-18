@@ -13,7 +13,9 @@ b = GraphBuilder()
 with open(spec.origin) as f:
     source = f.read()
 graph = b.build(
-    source=source
+    source=source,
+    package=spec.parent
+
 )
 
 with open('.file_list.txt', 'w') as f:
