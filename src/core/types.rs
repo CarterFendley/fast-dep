@@ -80,9 +80,6 @@ impl DepGraph {
     }
 
     pub fn add_dependency(&self, from: &str, on: &str) {
-        // This method will take a node which is currently under construction and updated it's dependencies.
-        // 
-        // **NOTE:** It is imperative that the `from` which is taken in and returned from this method is added to the graph at some point.
         debug!("Add dependency '{}' -> '{}'", from, on);
 
         // Make sure we have the `on` node
@@ -95,6 +92,7 @@ impl DepGraph {
             "Node does not exist on graph: {}", on
         );
 
+        // TODO: Jonathon pls look at this
         let mut on_node = self.nodes.get(on).unwrap().borrow_mut();
         on_node.dependents.insert(from.to_string());
 

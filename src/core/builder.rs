@@ -266,6 +266,7 @@ impl GraphBuilder {
             // Done!
             return
         } else if name != "<terminal>" {
+            // TODO: Can this happen before reaching out to python
             if !self.cache.is_none() {
                 if self.cache.as_ref().unwrap().has_node(&name) {
                     // Process the parent and see if that adds the node first
@@ -325,7 +326,7 @@ impl GraphBuilder {
         // None for depth to allow that to be resolved by add_dependency(...)
         let new_node = DepNode::new(spec.clone(), None);
         let source = self._load_source(&new_node);
-        self.graph.add(new_node);
+        self.graph.add(new_node); // Can this be delayed, how about self reference?
 
         // Add dependency from current node, to this new one
         if let Some(from) = from {

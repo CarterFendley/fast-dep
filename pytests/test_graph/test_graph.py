@@ -17,7 +17,6 @@ from fast_dep import GraphBuilder
 
 def test_module_dep():
     builder = GraphBuilder()
-    print(inspect.getsource(import_module_dep))
     graph = builder.build(
         inspect.getsource(import_module_dep),
         package='test_packages'
@@ -54,7 +53,6 @@ def test_module_dep():
 
     for expected in expected_nodes:
         actual = graph.get(expected['name'])
-        print(expected['name'])
         assert actual.dependencies == expected['dependencies']
         assert actual.dependents == expected['dependents']
         assert actual.depth == expected['depth']
