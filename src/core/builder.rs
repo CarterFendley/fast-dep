@@ -231,7 +231,7 @@ impl GraphBuilder {
         // Maybe expensive but some values will change names after find_spec()
         // TODO: Deal with this in another way?
         let spec: Option<ModuleSpec> = find_spec(name);
-    
+
         if spec.is_none() {
             debug!("!!!! Unable to find spec for name: '{}' !!!!", name);
             return
@@ -242,6 +242,7 @@ impl GraphBuilder {
         let name = spec.name.clone();
 
         // Double borrow in add_dependency will fail, self references are valid python, just going to not track them for now.
+        // TODO: Example??
         if let Some(from) = from {
             if from == &name {
                 return

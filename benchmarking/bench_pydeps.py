@@ -12,7 +12,14 @@ spec = find_spec(module)
 target = spec.origin
 
 def empty(args="", **kw):
-    args = pydeps.cli.parse_args(['foo', '--no-config', '--pylib'] + args.split())
+    args = pydeps.cli.parse_args([
+        'foo',
+        '--no-config',
+        '--pylib',
+        # '--max-bacon', '0', # Zero is infinite
+        '--noise-level', '10000',
+        '--max-module-depth', '10000'
+    ] + args.split())
     args.pop('fname')
     args.update(kw)
     return args
