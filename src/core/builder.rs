@@ -94,7 +94,6 @@ impl GraphBuilder {
                 Ok(agent) => Some(agent),
                 Err(error) => {
                     warn!("Pyroscope agent build failed with error: {}", error);
-                    // Trying to less "frowned on" by using unwraps here but this branching is odd. Ideally here I would just immediately set the outer `profiling_agent` to None, but I can't figure out how to do this. Instead, I have to react to this `None` value in code below, even though I know what I want `profiling_agent` to be and don't need to continue this if clause at all.
                     None
                 }
             };
@@ -103,7 +102,6 @@ impl GraphBuilder {
 
             match agent {
                 Some(agent) => {
-                    // I also feel this tends to happen, a lot of nested matching. I love matching and hate that Python / C++ does not have them but when I have like 3+ matches, I start to go dizzy. Probably this one is especially cause I re-use `agent` here a bunch, but the alternative is to have a bunch of extra vars floating around.
                     match agent.start() {
                         Ok(agent) => {
                             info!(
