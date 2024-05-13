@@ -5,53 +5,24 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::error::Error;
 
-#[derive(FromPyObject)]
-pub struct ModuleSpec {
-    name: String,
-    origin: String
-}
+// TODO: Do tests actually need this?
+pub mod minimal_parser;
+pub use minimal_parser::*;
 
-pub fn find_spec(name: &str) -> PyResult<ModuleSpec> {
-    Python::with_gil(|py| {
-        let importlib_util = PyModule::import(py, "importlib.util")?;
+mod core;
+mod importlib;
 
-        let spec: ModuleSpec = importlib_util
-            .getattr("find_spec")?
-            .call1((name, ))?
-            .extract()?;
+#[pymodule]
+fn fast_dep(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    pyo3_log::init();
 
-        Ok(spec)
-    })
-}
+    m.add_class::<core::DepNode>()?;
+    m.add_class::<core::DepGraph>()?;
+    m.add_class::<core::GraphBuilder>()?;
 
-pub fn get_ast(file_path: &str) -> Result<(), Box<dyn Error>>{
-    let mut file = File::open(Path::new(file_path))?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
+    let parser_module = PyModule::new(_py, "parser")?;
+    parser_module.add_function(wrap_pyfunction!(parse, parser_module)?)?;
 
-    Python::with_gil(|py| -> PyResult<()> {
-        let importlib_util = PyModule::import(py, "importlib.util")?;
-
-        let spec: ModuleSpec = importlib_util
-            .getattr("find_spec")?
-            .call1(("os.path",))?
-            .extract()?;
-
-        print!("{}", spec.origin);
-
-        Ok(())
-    })?;
-
-    print!("{}", contents);
+    m.add_submodule(parser_module)?;
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        // Later
-    }
 }

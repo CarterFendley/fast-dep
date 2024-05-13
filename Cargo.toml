@@ -1,29 +1,23 @@
 [package]
 name = "fast-dep"
-version = "0.0.1"
+version = "0.0.4"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+log = "0.4.19"
+pest = "2.7.2"
+pest_derive = "2.7.2"
 pyo3 = ">=0.13.0"
+pyo3-build-config = "0.19.2"
+pyo3-log = "0.8.3"
 
 [lib]
 name = "fast_dep"
 path = "src/lib.rs"
-crate-type = ["cdylib", "lib"]
-
-[[bin]]
-name = "fast-dep"
-path = "src/bin/bin.rs"
+crate-type = ["cdylib"]
 
 [features]
 extension-module = ["pyo3/extension-module"]
-
-[[tool.maturin.targets]]
-name = "fast_dep"
-kind = "lib"
-
-[[tool.maturin.targets]]
-name = "fast-dep"
-kind = "bin"
+default = ["extension-module"]
