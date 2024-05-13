@@ -12,6 +12,8 @@ pest_derive = "2.7.2"
 pyo3 = ">=0.13.0"
 pyo3-build-config = "0.19.2"
 pyo3-log = "0.8.3"
+pyroscope = "0.5.7"
+pyroscope_pprofrs = "0.2.7"
 
 [lib]
 name = "fast_dep"

@@ -1,11 +1,14 @@
 use std::collections::HashSet;
 use std::mem;
 use std::path::Path;
+use std::fmt::format;
 use std::fs::File;
 use std::io::prelude::*;
 use log::{debug, info, warn};
 
 use pyo3::prelude::*;
+use pyroscope::PyroscopeAgent;
+use pyroscope_pprofrs::{pprof_backend, PprofConfig};
 
 use crate::importlib::*;
 use crate::minimal_parser::*;
@@ -31,17 +34,31 @@ pub struct GraphBuilder {
     processing: HashSet<String>,
     verbose: bool,
     cache: Option<DepGraph>,
-    metadata: BuildMetadata
+    metadata: BuildMetadata,
+    // For profiling
+    pyro_server: Option<String>,
+    pyro_app_name: String,
+    pyro_invocation_count: u32,
 }
 
 #[pymethods]
 impl GraphBuilder {
     #[new]
-    pub fn new(verbose: Option<bool>) -> Self {
+    pub fn new(
+        verbose: Option<bool>,
+        pyro_server: Option<String>,
+        pyro_app_name: Option<String>,
+    ) -> Self {
         let verbose = if let Some(verbose) = verbose {
             verbose
         } else {
             false
+        };
+
+        let pyro_app_name = if let Some(pyro_app_name) = pyro_app_name {
+            pyro_app_name
+        } else {
+            "fast-dep".to_string()
         };
 
         let builder = GraphBuilder {
@@ -50,12 +67,61 @@ impl GraphBuilder {
             verbose: verbose,
             cache: None,
             metadata: BuildMetadata::new(),
+            // For profiling
+            pyro_server: pyro_server,
+            pyro_app_name: pyro_app_name,
+            pyro_invocation_count: 0,
         };
 
         builder
     }
 
     pub fn build(&mut self, source: &str, package: Option<String>) -> DepGraph {
+        let profiling_agent = if let Some(pyro_server) = self.pyro_server.clone() {
+            let session_name = format!("{}-{}", self.pyro_app_name, 
+            self.pyro_invocation_count);
+            info!(
+                "Building pyroscope agent: {}",
+                session_name
+            );
+            let agent = PyroscopeAgent::builder(
+                pyro_server,
+                session_name.clone()
+            ).backend(pprof_backend(PprofConfig::new().sample_rate(100)))
+            .build();
+
+            let agent = match agent {
+                Ok(agent) => Some(agent),
+                Err(error) => {
+                    warn!("Pyroscope agent build failed with error: {}", error);
+                    None
+                }
+            };
+
+            self.pyro_invocation_count += 1;
+
+            match agent {
+                Some(agent) => {
+                    match agent.start() {
+                        Ok(agent) => {
+                            info!(
+                                "Pyroscope agent started: {}",
+                                session_name
+                            );
+                            Some(agent)
+                        }, // Happy path!
+                        Err(error) => {
+                            warn!("Pyroscope agent failed to start with error: {}", error);
+                            None
+                        }
+                    }
+                }
+                None => None
+            }
+        } else {
+            None
+        };
+
         // Trying to make source look like a package
         let (package, dirs) = if let Some(package) = package {
             (package, Some(vec![]))
@@ -76,6 +142,8 @@ impl GraphBuilder {
 
         let node = DepNode::new(spec.clone(), Some(0));
         self.graph.add(node);
+
+        info!("Building graph...");
         self._process_imports(spec, source);
 
         if self.metadata.from_cache == 0 {
@@ -102,6 +170,12 @@ impl GraphBuilder {
             cache.merge(to_cache)
         } else {
             self.cache = Some(to_cache)
+        }
+
+        if let Some(agent) = profiling_agent {
+            // Note, not 100% sure why two calls are needed here
+            let agent_ready = agent.stop().unwrap();
+            agent_ready.shutdown();
         }
 
         return graph
